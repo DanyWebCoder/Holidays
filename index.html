@@ -134,7 +134,7 @@ footer{padding:26px 0 60px;color:var(--mut);font-size:.85rem;display:flex;justif
 
   <footer>
     <span>© Календа · праздники на каждый день</span>
-    <span>Дополнить — одна строка в объекте <b>HOLIDAYS</b></span>
+    <span>Праздники будут добавлять со временем!</span>
   </footer>
 </div>
 
@@ -703,7 +703,7 @@ function doSearch(q){
       <span class="sd">${r.d} ${MON_GEN[r.m-1]}</span>
       <span class="sn">${r.e||"🎉"} ${r.nm}</span>
       <span class="tag" style="--c:${(TYPES[r.t]||TYPES.ve).c}">${(TYPES[r.t]||TYPES.ve).label}</span>
-    </button>`).join(""):`<div class="quiet">Ничего не нашлось. Добавьте праздник в объект HOLIDAYS! ✏️</div>`;
+    </button>`).join(""):`<div class="quiet">Ничего не нашлось. Возможно, праздник отсутствует! ✏️</div>`;
   box.querySelectorAll(".srow").forEach(b=>b.onclick=()=>{
     sel=new Date(y,+b.dataset.m-1,+b.dataset.d);
     $("#search").classList.remove("open");renderMain();
