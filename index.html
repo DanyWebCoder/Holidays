@@ -13,7 +13,7 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Unbounded:wght@500;700;800&family=Golos+Text:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>
-:root{--bg:#12152c;--panel:rgba(255,255,255,.035);--line:rgba(255,255,255,.09);--ink:#f5f2e9;--mut:#9aa1bd;--gold:#ffb703}
+:root{--bg:#12152c;--panel:rgba(255,255,255,.035);--line:rgba(255,255,255,.09);--ink:#f5f2e9;--mut:#9aa1bd;--gold:#ffb703;--accent:#ef476f}
 *{box-sizing:border-box}
 body{margin:0;background:var(--bg);color:var(--ink);font-family:"Golos Text",system-ui,sans-serif;min-height:100vh;overflow-x:hidden}
 body::before{content:"";position:fixed;inset:0;z-index:-2;background:
@@ -68,7 +68,7 @@ body::before{content:"";position:fixed;inset:0;z-index:-2;background:
 .ev:last-child{border:none}
 .ev b{color:var(--gold);font-family:"Unbounded";font-weight:700;font-size:.82rem;white-space:nowrap}
 .sub{color:var(--mut);font-size:.8rem;line-height:1.5}
-footer{padding:26px 0 60px;color:var(--mut);font-size:.85rem;display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap}
+footer{padding:26px 0 20px;color:var(--mut);font-size:.85rem;display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap}
 #search{position:fixed;inset:0;z-index:50;background:rgba(10,12,26,.75);backdrop-filter:blur(6px);display:none}
 #search.open{display:block}
 .sbox{width:min(660px,92%);margin:9vh auto;background:#181c3c;border:1px solid var(--line);border-radius:20px;padding:18px}
@@ -79,6 +79,8 @@ footer{padding:26px 0 60px;color:var(--mut);font-size:.85rem;display:flex;justif
 .srow:hover{background:rgba(255,255,255,.04)}
 .sd{flex:none;width:88px;color:var(--gold);font-weight:700;font-size:.85rem}
 .sn{flex:1;font-size:.95rem}
+.updateBanner{margin:0 0 30px;padding:14px 18px;border:1px solid var(--accent);border-radius:14px;background:rgba(239,71,111,.08);display:flex;justify-content:space-between;align-items:center;gap:14px;flex-wrap:wrap;font-size:.9rem;color:var(--ink)}
+.updateBanner p{margin:0;flex:1;min-width:200px}
 @media(max-width:560px){.tag,.holi .tag{display:none}}
 </style>
 </head>
@@ -132,10 +134,14 @@ footer{padding:26px 0 60px;color:var(--mut);font-size:.85rem;display:flex;justif
     </aside>
   </main>
 
+  <div class="updateBanner" id="updateBanner" hidden>
+    <p>🆕 Доступна новая версия приложения</p>
+    <button class="btn" id="reloadBtn">Обновить</button>
+  </div>
+
   <footer>
     <span>© Календа · праздники на каждый день</span>
-    <span>Праздники будут добавлять со временем!</span>
-    <span>Приложение еще сырое, могут быть <b>неточности</b></span>
+    <span>Дополнить — одна строка в объекте <b>HOLIDAYS</b></span>
   </footer>
 </div>
 
@@ -147,6 +153,8 @@ footer{padding:26px 0 60px;color:var(--mut);font-size:.85rem;display:flex;justif
 </div>
 
 <script>
+const APP_VERSION="kalenda-v4";
+
 const HOLIDAYS={
 "1-1":[["Новый год","ст","🎄"],["Всемирный день мира","ин","🕊️"]],
 "1-2":[["Новогодние каникулы","ст","❄️"],["День научной фантастики","ин","🚀"]],
@@ -461,13 +469,13 @@ const HOLIDAYS={
 "11-6":[["Международный день предотвращения эксплуатации окружающей среды","ин","🌍"]],
 "11-7":[["Годовщина Октябрьской революции 1917 года","на","🚩"]],
 "11-8":[["Международный день КВН","ве","😂"]],
-"11-9":[["Всемирный день качества","ин","✅"]],
+"11-9":[["Начало Всемирной недели качества","ин","✅"]],
 "11-10":[["День сотрудника органов внутренних дел РФ","пр","🚔"],["Всемирный день науки","ин","🔬"]],
 "11-11":[["День экономиста России","пр","📊"],["Международный день энергосбережения","ин","💡"]],
 "11-12":[["Синичкин день","на","🐦"],["Всемирный день борьбы с пневмонией","ин","🫁"]],
 "11-13":[["Международный день слепых","ин","🦯"],["Всемирный день доброты","ин","💗"]],
 "11-14":[["Всемирный день борьбы с диабетом","ин","🩺"],["День социолога в России","пр","👥"]],
-"11-15":[["Всемирный день вторичной переработки","ин","♻️"]],
+"11-15":[["Завершение Всемирной недели качества","ин","✅"],["Всемирный день вторичной переработки","ин","♻️"]],
 "11-16":[["Международный день толерантности","ин","🌍"]],
 "11-17":[["Международный день студентов","ин","🎓"],["Международный день недоношенных детей","ин","👶"]],
 "11-18":[["День рождения Деда Мороза (Великий Устюг)","ве","🎅"]],
@@ -600,6 +608,7 @@ function getFor(d){
   return [...(HOLIDAYS[k]||[]),...(yearData(d.getFullYear()).map[k]||[])];
 }
 function dayOfYear(d){return Math.round((startOfDay(d)-new Date(d.getFullYear(),0,1))/864e5)+1;}
+function daysInYear(y){return (new Date(y,1,29).getMonth()===1)?366:365;}
 function isoWeek(date){
   const d=new Date(Date.UTC(date.getFullYear(),date.getMonth(),date.getDate()));
   const dn=(d.getUTCDay()+6)%7;d.setUTCDate(d.getUTCDate()-dn+3);
@@ -632,7 +641,7 @@ function renderMain(){
   $("#dyear").textContent=sel.getFullYear()+" · "+WD_FULL[sel.getDay()].toLowerCase();
   const h=new Date().getHours();
   $("#greet").textContent=(h>=5&&h<11?"Доброе утро":h<17?"Добрый день":h<23?"Добрый вечер":"Доброй ночи")+(isToday?"! Что празднуем сегодня?":` — ${sel.getDate()} ${MON_GEN[sel.getMonth()]}`);
-  const total=new Date(sel.getFullYear(),11,31).getDate();
+  const total=daysInYear(sel.getFullYear());
   $("#chips").innerHTML=
     `<span class="chip">День ${dayOfYear(sel)} из ${total}</span>`+
     `<span class="chip">Неделя ${isoWeek(sel)}</span>`+
@@ -704,7 +713,7 @@ function doSearch(q){
       <span class="sd">${r.d} ${MON_GEN[r.m-1]}</span>
       <span class="sn">${r.e||"🎉"} ${r.nm}</span>
       <span class="tag" style="--c:${(TYPES[r.t]||TYPES.ve).c}">${(TYPES[r.t]||TYPES.ve).label}</span>
-    </button>`).join(""):`<div class="quiet">Ничего не нашлось. Возможно, праздник отсутствует! ✏️</div>`;
+    </button>`).join(""):`<div class="quiet">Ничего не нашлось. Добавьте праздник в объект HOLIDAYS! ✏️</div>`;
   box.querySelectorAll(".srow").forEach(b=>b.onclick=()=>{
     sel=new Date(y,+b.dataset.m-1,+b.dataset.d);
     $("#search").classList.remove("open");renderMain();
@@ -762,10 +771,61 @@ $("#installBtn").onclick=async()=>{
   deferred=null;$("#installBtn").hidden=true;
 };
 if(matchMedia("(display-mode: standalone)").matches)$("#installBtn").hidden=true;
+
 if("serviceWorker" in navigator){
-  const SW=`const C='kalenda-v1';self.addEventListener('install',e=>{e.waitUntil(caches.open(C).then(c=>c.addAll(['./'])))});self.addEventListener('fetch',e=>{if(e.request.method!=='GET')return;e.respondWith(caches.match(e.request).then(r=>r||fetch(e.request).then(res=>{const cl=res.clone();caches.open(C).then(c=>c.put(e.request,cl));return res}).catch(()=>caches.match('./'))))});`;
-  navigator.serviceWorker.register(URL.createObjectURL(new Blob([SW],{type:"text/javascript"}))).catch(()=>{});
+  const SW=`
+const CACHE='kalenda-v4';
+const ASSETS=['./','./?v=4'];
+self.addEventListener('install',e=>{
+  e.waitUntil(caches.open(CACHE).then(c=>c.addAll(ASSETS)));
+  self.skipWaiting();
+});
+self.addEventListener('activate',e=>{
+  e.waitUntil(caches.keys().then(ks=>Promise.all(ks.filter(k=>k!==CACHE).map(k=>caches.delete(k)))).then(()=>self.clients.claim()));
+});
+self.addEventListener('fetch',e=>{
+  if(e.request.method!=='GET')return;
+  e.respondWith(
+    caches.match(e.request).then(cached=>{
+      const netFetch=fetch(e.request).then(netRes=>{
+        if(netRes&&netRes.status===200&&netRes.type==='basic'){
+          const clone=netRes.clone();
+          caches.open(CACHE).then(c=>c.put(e.request,clone));
+        }
+        return netRes;
+      }).catch(()=>cached);
+      if(cached){
+        return cached.then(r=>{
+          netFetch.catch(()=>{});
+          return r;
+        });
+      }
+      return netFetch;
+    })
+  );
+});`;
+  navigator.serviceWorker.register(URL.createObjectURL(new Blob([SW],{type:"text/javascript"}))).then(reg=>{
+    if(reg.waiting){$("#updateBanner").hidden=false;}
+    reg.addEventListener("updatefound",()=>{
+      const nw=reg.installing;
+      if(!nw)return;
+      nw.addEventListener("statechange",()=>{
+        if(nw.state==="installed"&&navigator.serviceWorker.controller){
+          $("#updateBanner").hidden=false;
+        }
+      });
+    });
+  }).catch(()=>{});
 }
+
+$("#reloadBtn").onclick=()=>{
+  if(navigator.serviceWorker){
+    navigator.serviceWorker.getRegistration().then(reg=>{
+      if(reg&&reg.waiting){reg.waiting.postMessage({type:"SKIP_WAITING"});}
+    });
+  }
+  window.location.reload();
+};
 
 renderWeek();renderMain();renderTomorrow();renderEvents();
 </script>
