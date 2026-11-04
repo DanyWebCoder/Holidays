@@ -13,7 +13,7 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Unbounded:wght@500;700;800&family=Golos+Text:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>
-:root{--bg:#12152c;--panel:rgba(255,255,255,.035);--line:rgba(255,255,255,.09);--ink:#f5f2e9;--mut:#9aa1bd;--gold:#ffb703;--accent:#ef476f}
+:root{--bg:#12152c;--panel:rgba(255,255,255,.035);--line:rgba(255,255,255,.09);--ink:#f5f2e9;--mut:#9aa1bd;--gold:#ffb703}
 *{box-sizing:border-box}
 body{margin:0;background:var(--bg);color:var(--ink);font-family:"Golos Text",system-ui,sans-serif;min-height:100vh;overflow-x:hidden}
 body::before{content:"";position:fixed;inset:0;z-index:-2;background:
@@ -68,7 +68,7 @@ body::before{content:"";position:fixed;inset:0;z-index:-2;background:
 .ev:last-child{border:none}
 .ev b{color:var(--gold);font-family:"Unbounded";font-weight:700;font-size:.82rem;white-space:nowrap}
 .sub{color:var(--mut);font-size:.8rem;line-height:1.5}
-footer{padding:26px 0 20px;color:var(--mut);font-size:.85rem;display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap}
+footer{padding:26px 0 60px;color:var(--mut);font-size:.85rem;display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap}
 #search{position:fixed;inset:0;z-index:50;background:rgba(10,12,26,.75);backdrop-filter:blur(6px);display:none}
 #search.open{display:block}
 .sbox{width:min(660px,92%);margin:9vh auto;background:#181c3c;border:1px solid var(--line);border-radius:20px;padding:18px}
@@ -79,8 +79,6 @@ footer{padding:26px 0 20px;color:var(--mut);font-size:.85rem;display:flex;justif
 .srow:hover{background:rgba(255,255,255,.04)}
 .sd{flex:none;width:88px;color:var(--gold);font-weight:700;font-size:.85rem}
 .sn{flex:1;font-size:.95rem}
-.updateBanner{margin:0 0 30px;padding:14px 18px;border:1px solid var(--accent);border-radius:14px;background:rgba(239,71,111,.08);display:flex;justify-content:space-between;align-items:center;gap:14px;flex-wrap:wrap;font-size:.9rem;color:var(--ink)}
-.updateBanner p{margin:0;flex:1;min-width:200px}
 @media(max-width:560px){.tag,.holi .tag{display:none}}
 </style>
 </head>
@@ -134,11 +132,6 @@ footer{padding:26px 0 20px;color:var(--mut);font-size:.85rem;display:flex;justif
     </aside>
   </main>
 
-  <div class="updateBanner" id="updateBanner" hidden>
-    <p>🆕 Доступна новая версия приложения</p>
-    <button class="btn" id="reloadBtn">Обновить</button>
-  </div>
-
   <footer>
     <span>© Календа · праздники на каждый день</span>
     <span>Дополнить — одна строка в объекте <b>HOLIDAYS</b></span>
@@ -153,8 +146,6 @@ footer{padding:26px 0 20px;color:var(--mut);font-size:.85rem;display:flex;justif
 </div>
 
 <script>
-const APP_VERSION="kalenda-v4";
-
 const HOLIDAYS={
 "1-1":[["Новый год","ст","🎄"],["Всемирный день мира","ин","🕊️"]],
 "1-2":[["Новогодние каникулы","ст","❄️"],["День научной фантастики","ин","🚀"]],
@@ -773,59 +764,10 @@ $("#installBtn").onclick=async()=>{
 if(matchMedia("(display-mode: standalone)").matches)$("#installBtn").hidden=true;
 
 if("serviceWorker" in navigator){
-  const SW=`
-const CACHE='kalenda-v4';
-const ASSETS=['./','./?v=4'];
-self.addEventListener('install',e=>{
-  e.waitUntil(caches.open(CACHE).then(c=>c.addAll(ASSETS)));
-  self.skipWaiting();
-});
-self.addEventListener('activate',e=>{
-  e.waitUntil(caches.keys().then(ks=>Promise.all(ks.filter(k=>k!==CACHE).map(k=>caches.delete(k)))).then(()=>self.clients.claim()));
-});
-self.addEventListener('fetch',e=>{
-  if(e.request.method!=='GET')return;
-  e.respondWith(
-    caches.match(e.request).then(cached=>{
-      const netFetch=fetch(e.request).then(netRes=>{
-        if(netRes&&netRes.status===200&&netRes.type==='basic'){
-          const clone=netRes.clone();
-          caches.open(CACHE).then(c=>c.put(e.request,clone));
-        }
-        return netRes;
-      }).catch(()=>cached);
-      if(cached){
-        return cached.then(r=>{
-          netFetch.catch(()=>{});
-          return r;
-        });
-      }
-      return netFetch;
-    })
-  );
-});`;
-  navigator.serviceWorker.register(URL.createObjectURL(new Blob([SW],{type:"text/javascript"}))).then(reg=>{
-    if(reg.waiting){$("#updateBanner").hidden=false;}
-    reg.addEventListener("updatefound",()=>{
-      const nw=reg.installing;
-      if(!nw)return;
-      nw.addEventListener("statechange",()=>{
-        if(nw.state==="installed"&&navigator.serviceWorker.controller){
-          $("#updateBanner").hidden=false;
-        }
-      });
-    });
-  }).catch(()=>{});
+  window.addEventListener("load",()=>{
+    navigator.serviceWorker.register("./sw.js").catch(()=>{});
+  });
 }
-
-$("#reloadBtn").onclick=()=>{
-  if(navigator.serviceWorker){
-    navigator.serviceWorker.getRegistration().then(reg=>{
-      if(reg&&reg.waiting){reg.waiting.postMessage({type:"SKIP_WAITING"});}
-    });
-  }
-  window.location.reload();
-};
 
 renderWeek();renderMain();renderTomorrow();renderEvents();
 </script>
